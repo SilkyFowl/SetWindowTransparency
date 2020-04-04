@@ -87,4 +87,4 @@ function Set-Transparency {
     [WindowTransparencyHelper]::SetLayeredWindowAttributes($WindowHandle, 0, $transparency, 0x02) | Out-Null
 }
 
-Export-ModuleMember -Function Set-WindowTransparency2, Set-WindowTransparency2
+Export-ModuleMember -Function Set-WindowTransparency, Set-WindowTransparency2
