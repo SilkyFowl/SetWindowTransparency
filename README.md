@@ -5,8 +5,8 @@ Set window transparency using Win32 API.
 
 ```pwsh
 # Set transparency 160
-Get-Process CLIPStudioPaint | Set-WindowTransparency 160
+Get-Process Foo | Set-WindowTransparency 160
 
 # Set transparency 255
-Get-Process CLIPStudioPaint | Set-WindowTransparency 255
+Get-Process Foo | Set-WindowTransparency 255
 ```
