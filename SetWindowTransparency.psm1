@@ -1,90 +1,38 @@
-using assembly ChildWindowHandles.dll
-using assembly WindowTransparencyHelper.dll
-using namespace Win32.user32
+using assembly .\lib\LayeredWindowManager.dll
+using assembly .\lib\WindowSercher.dll
+using namespace User32
+
+[int]$GWL_EXSTYLE = -20
+[int]$WS_EX_LAYERED = 0x80000
+[int]$LWA_ALPHA = 0x2
 
 function Set-WindowTransparency {
-    [CmdletBinding()]
-    param (
-        # Specifies a path to one or more locations.
-        [Parameter(
-            Position = 0,
-            ValueFromPipeline = $false,
-            ValueFromPipelineByPropertyName = $true,
-            HelpMessage = "Transparency")]
-        [Alias("tran")]
-        [ValidateRange(0, 255)]
-        [int] $transparency = 200,
-        [Parameter(Mandatory = $true,
-            Position = 1,
-            ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            HelpMessage = "Target")]
-        [Alias("proc")]
-        [ValidateNotNullOrEmpty()]
-        [System.Diagnostics.Process]
-        $process
-    )
-    [ChildWindowHandles]::GetChildWindows($process.MainWindowHandle)
-    $wl = [WindowTransparencyHelper]::GetWindowLong($process.MainWindowHandle, -20)
-    [WindowTransparencyHelper]::SetWindowLong($process.MainWindowHandle, -20, ($wl -bor 0x80000)) | Out-Null
-    [WindowTransparencyHelper]::SetLayeredWindowAttributes($process.MainWindowHandle, 0, $transparency, 0x02) | Out-Null
+	[CmdletBinding()]
+	param (
+		# Specifies a path to one or more locations.
+		[Parameter(
+			Position = 0,
+			ValueFromPipeline = $false,
+			ValueFromPipelineByPropertyName = $true,
+			HelpMessage = "Transparency")]
+		[Alias("tran")]
+		[ValidateRange(0, 255)]
+		[int] $transparency = 200,
+		[Parameter(Mandatory = $true,
+			Position = 1,
+			ValueFromPipeline = $true,
+			ValueFromPipelineByPropertyName = $true,
+			HelpMessage = "Target")]
+		[Alias("proc")]
+		[ValidateNotNullOrEmpty()]
+		[System.Diagnostics.Process]
+		$process
+	)
+	[WindowSercher]::SearchForWindow($process.id).GetEnumerator().foreach{
+		$wl = [LayeredWindowManager]::GetWindowLong($_, $GWL_EXSTYLE)
+		[LayeredWindowManager]::SetWindowLong($_, $GWL_EXSTYLE, ($wl -bor $WS_EX_LAYERED)) | Out-Null
+		[LayeredWindowManager]::SetLayeredWindowAttributes($_, 0, $transparency, $LWA_ALPHA) | Out-Null
+	}
 }
 
-function Set-WindowTransparency2 {
-    [CmdletBinding()]
-    param (
-        # Specifies a path to one or more locations.
-        [Parameter(
-            Position = 0,
-            ValueFromPipeline = $false,
-            ValueFromPipelineByPropertyName = $true,
-            HelpMessage = "Transparency")]
-        [Alias("tran")]
-        [ValidateRange(0, 255)]
-        [int] $transparency = 200,
-        [Parameter(Mandatory = $true,
-            Position = 1,
-            ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            HelpMessage = "Target")]
-        [Alias("proc")]
-        [ValidateNotNullOrEmpty()]
-        [System.Diagnostics.Process]
-        $process
-    )
-    [ChildWindowHandles]::GetChildWindows($process.MainWindowHandle).GetEnumerator().ForEach{
-        $_ | Set-Transparency $transparency
-    }
-
-    $process.MainWindowHandle | Set-Transparency $transparency
-}
-
-function Set-Transparency {
-    [CmdletBinding()]
-    param (
-        # Specifies a path to one or more locations.
-        [Parameter(
-            Position = 0,
-            ValueFromPipeline = $false,
-            ValueFromPipelineByPropertyName = $true,
-            HelpMessage = "Transparency")]
-        [Alias("tran")]
-        [ValidateRange(0, 255)]
-        [int] $transparency = 200,
-        [Parameter(Mandatory = $true,
-            Position = 1,
-            ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            HelpMessage = "Target")]
-        [Alias("proc")]
-        [ValidateNotNullOrEmpty()]
-        [System.IntPtr]
-        $WindowHandle
-    )
-
-    $wl = [WindowTransparencyHelper]::GetWindowLong($WindowHandle, -20)
-    [WindowTransparencyHelper]::SetWindowLong($WindowHandle, -20, ($wl -bor 0x80000)) | Out-Null
-    [WindowTransparencyHelper]::SetLayeredWindowAttributes($WindowHandle, 0, $transparency, 0x02) | Out-Null
-}
-
-Export-ModuleMember -Function Set-WindowTransparency, Set-WindowTransparency2
+Export-ModuleMember -Function Set-WindowTransparency
