@@ -28,10 +28,13 @@ function Set-WindowTransparency {
 		[System.Diagnostics.Process]
 		$process
 	)
-	[WindowSercher]::SearchForWindow($process.id).GetEnumerator().foreach{
-		$wl = [LayeredWindowManager]::GetWindowLong($_, $GWL_EXSTYLE)
-		[LayeredWindowManager]::SetWindowLong($_, $GWL_EXSTYLE, ($wl -bor $WS_EX_LAYERED)) | Out-Null
-		[LayeredWindowManager]::SetLayeredWindowAttributes($_, 0, $transparency, $LWA_ALPHA) | Out-Null
+
+	process{
+		[WindowSercher]::SearchForWindow($process.id).GetEnumerator().foreach{
+			$wl = [LayeredWindowManager]::GetWindowLong($_, $GWL_EXSTYLE)
+			[LayeredWindowManager]::SetWindowLong($_, $GWL_EXSTYLE, ($wl -bor $WS_EX_LAYERED)) | Out-Null
+			[LayeredWindowManager]::SetLayeredWindowAttributes($_, 0, $transparency, $LWA_ALPHA) | Out-Null
+		}
 	}
 }
 
