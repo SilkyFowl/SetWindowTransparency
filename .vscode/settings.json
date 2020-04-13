@@ -1,0 +1,6 @@
+{
+  "markdownlint.config": {
+    "MD003": false,
+    "MD041": { "front_matter_title": "^\\s*title\\s*[:=]", "level": 2 }
+  }
+}
